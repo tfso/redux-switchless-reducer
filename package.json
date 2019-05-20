@@ -1,7 +1,7 @@
 {
   "name": "redux-switchless-reducer",
-  "version": "1.0.0",
-  "description": "like react-starter-kit/createSlice but without the payload constraint on actions",
+  "version": "0.1.0",
+  "description": "Create redux reducers and actions with less code",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
