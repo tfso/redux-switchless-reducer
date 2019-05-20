@@ -1,0 +1,47 @@
+{
+  "name": "redux-switchless-reducer",
+  "version": "1.0.0",
+  "description": "like react-starter-kit/createSlice but without the payload constraint on actions",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest --watch",
+    "citest": "jest --ci",
+    "prepare": "npm run build",
+    "prepublishOnly": "jest --ci"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tfso/redux-switchless-reducer.git"
+  },
+  "keywords": [
+    "redux"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tfso/redux-switchless-reducer/issues"
+  },
+  "homepage": "https://github.com/tfso/redux-switchless-reducer#readme",
+  "dependencies": {
+    "redux": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.13",
+    "jest": "^24.8.0",
+    "ts-jest": "^24.0.2",
+    "typescript": "^3.4.5"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ]
+  }
+}
