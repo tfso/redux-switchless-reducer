@@ -1,6 +1,6 @@
 {
   "name": "@tfso/redux-switchless-reducer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Create redux reducers and actions with less code",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

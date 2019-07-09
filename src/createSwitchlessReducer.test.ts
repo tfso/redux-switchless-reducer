@@ -5,7 +5,8 @@ describe('createSwitchlessReducer', () => {
     describe('when passing namespace', () => {
         const { actions, reducer } = createSwitchlessReducer({
             reducers: {
-                increment: state => state + 1
+                increment: state => state + 1,
+                foo: (_state, action: {bar: string}) => action.bar.length
             },
             initialState: 0,
             namespace: 'cool'
@@ -13,6 +14,11 @@ describe('createSwitchlessReducer', () => {
 
         it('should create increment action', () => {
             expect(actions.hasOwnProperty('increment')).toBe(true)
+        })
+
+        it('should set type on actions', () => {
+            expect(actions.foo.type).toBe('cool.foo')
+            expect(actions.increment.type).toBe('cool.increment')
         })
 
         it('should have the correct action for increment', () => {

@@ -5,9 +5,10 @@ import { createReducer, CaseReducers, CaseReducer } from './createReducer'
 /**
  * An action creator atttached to a namespace.
  */
-export type NamespaceActionCreator<P> = P extends void
+export type NamespaceActionCreator<P> = (P extends void
 	? () => Action<string>
 	: (payload: P) => PayloadAction<P, string>
+) & {type: string}
 
 export interface SwitchlessReducer<
 	S = any,
