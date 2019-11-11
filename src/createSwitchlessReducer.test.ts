@@ -54,4 +54,49 @@ describe('createSwitchlessReducer', () => {
             expect(result).toBe(15)
         })
     })
+
+    describe('when providing namespaceReducer', () => {
+        const { reducer, actions } = createSwitchlessReducer({
+            namespace: 'foo',
+            initialState: 0,
+            reducers: {
+                increment: (state, _action: {payload: {factor: number}}) => state + 1
+            },
+            namespaceReducer: (state, {payload}) => state + payload.factor
+        })
+
+        it('should invoke namespaceReducer for all actions in the namespace', () => {
+            const result = reducer(0, actions.increment({payload: {factor: 0.1}}))
+
+            expect(result).toBe(1.1)
+        })
+
+        it('should not invoke namespaceReducer for actions not in the namespace', () => {
+            const result = reducer(0, {type: 'bar'})
+            
+            expect(result).toBe(0) // could've been 0.1 if namespaceReducer was invoked
+        })
+    })
+
+    describe('when providing globalReducer', () => {
+        const {reducer} = createSwitchlessReducer({
+            namespace: 'foo',
+            initialState: {
+                value: 0,
+                globalInvoked: false
+            },
+            reducers: {},
+            globalReducer: (state, action) => {
+                if(action.foo){
+                    return {...state, globalInvoked: true, value: 42}
+                }
+                return {...state, globalInvoked: true}
+            }
+        })
+
+        it('should invoke globalReducer for all actions', () => {
+            const result = reducer({value: 0, globalInvoked: false}, {type: 'anyaction', foo: true})
+            expect(result.globalInvoked).toBe(true)
+        })
+    })
 })

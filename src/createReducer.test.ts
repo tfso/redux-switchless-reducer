@@ -12,7 +12,7 @@ type TodosReducer = Reducer<TodoState, PayloadAction<Payload>>
 type TodosCaseReducer = CaseReducer<TodoState, PayloadAction<Payload>>
 
 describe('createReducer', () => {
-		describe('given pure reducers with immutable updates', () => {
+	describe('given pure reducers with immutable updates', () => {
 		const addTodo: TodosCaseReducer = (state, action) => {
 			const { newTodo } = action.payload
 
@@ -23,7 +23,7 @@ describe('createReducer', () => {
 		const toggleTodo: TodosCaseReducer = (state, action) => {
 			const { index } = action.payload
 
-			// Updates the todo object immutably withot relying on immer
+			// Updates the todo object immutably without relying on immer
 			return state.map((todo, i) => {
 				if (i !== index) return todo
 				return { ...todo, completed: !todo.completed }

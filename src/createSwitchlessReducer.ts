@@ -34,7 +34,7 @@ export interface CreateSwitchlessReducerOptions<
 	 * functions. For every action type, a matching action creator will be
 	 * generated using `createAction()`.
 	 */
-	reducers: CR
+	reducers?: CR
 
 	/**
 	 * A mapping from action types to action-type-specific *case reducer*
@@ -43,7 +43,16 @@ export interface CreateSwitchlessReducerOptions<
 	 */
 	extraReducers?: CaseReducers<S, any>
 
+	/**
+	 * Invoked *after* the `reducers` if the action dispatched is in the same namespace.
+	 * Should not return a new state object unless this reducer produces something to the state.
+	 */
 	namespaceReducer?: CaseReducer<S, any>
+
+	/**
+	 * Invoked *after* `namespaceReducer` and `reducers` for all actions dispatched to redux.
+	 * Should not return a new state object unless this reducer produces something to the state.
+	 */
 	globalReducer?: CaseReducer<S, any>
 }
 
@@ -54,6 +63,32 @@ type CaseReducerActionPayloads<CR extends CaseReducers<any, any>> = {
 		? P
 		: void)
 }
+
+function enhanceReducer<
+	S, TReducer extends Reducer<S>
+>(
+	namespace: string,
+	reducer: TReducer,
+	namespaceReducer?: CaseReducer<S, any>,
+	globalReducer?: CaseReducer<S, any>
+): Reducer<S> {
+	if(!namespaceReducer && !globalReducer) return reducer
+
+	// Empty namespace and no globalAction, we can't use a namespaceReducer when namespace is empty, consider throwing error or warning?
+	if(!globalReducer && namespace.length === 0) return reducer
+
+	return (state, action) => {
+		let nextState = reducer(state, action)
+		if(namespaceReducer && namespace.length > 0 && action.type.startsWith(namespace)){
+			nextState = namespaceReducer(nextState, action)
+		}
+		if(globalReducer){
+			nextState = globalReducer(nextState, action)
+		}
+		return nextState
+	}
+}
+
 
 function getType(namespace: string, actionKey: string): string {
 	return namespace ? `${namespace}.${actionKey}` : actionKey
@@ -71,12 +106,8 @@ export function createSwitchlessReducer<S, CR extends CaseReducers<S, any>>(
 	options: CreateSwitchlessReducerOptions<S, CR>
 ): SwitchlessReducer<S, CaseReducerActionPayloads<CR>> {
 	const { namespace, initialState, namespaceReducer, globalReducer } = options
-	const reducers = options.reducers || {}
+	const reducers = options.reducers || {} as CaseReducers<S, any>
 	const extraReducers = options.extraReducers || {}
-	if(namespaceReducer)
-		extraReducers.namespaceReducer = namespaceReducer
-	if(globalReducer)
-		extraReducers.globalReducer = globalReducer
 
 	const actionKeys = Object.keys(reducers)
 
@@ -85,7 +116,7 @@ export function createSwitchlessReducer<S, CR extends CaseReducers<S, any>>(
 		return map
 	}, extraReducers)
 
-	const reducer = createReducer(initialState, reducerMap)
+	const reducer = enhanceReducer(namespace, createReducer(initialState, reducerMap), namespaceReducer, globalReducer)
 
 	const actions = actionKeys.reduce((map, action) => {
 		const type = getType(namespace, action)
