@@ -22,7 +22,7 @@ jobs:
           cp README.md ./dist/
 
       - name: Test
-        run: npm citest
+        run: npm run citest
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v2.2.4
