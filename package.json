@@ -1,15 +1,13 @@
 {
   "name": "@tfso/redux-switchless-reducer",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Create redux reducers and actions with less code",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "index.js",
+  "types": "index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "jest --watch",
-    "citest": "jest --ci",
-    "prepare": "npm run build",
-    "prepublishOnly": "jest --ci"
+    "citest": "jest --ci"
   },
   "repository": {
     "type": "git",
