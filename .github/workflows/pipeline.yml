@@ -1,0 +1,114 @@
+name: Node.js Package
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: | 
+          npm run build
+          cp package.json ./dist/
+          cp README.md ./dist/
+
+      - name: Test
+        run: npm citest
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          path: ./dist
+      
+  publish-dev:
+    if: ${{ github.event_name == 'pull_request' }} 
+    needs: build
+    runs-on: ubuntu-latest
+    permissions: 
+      packages: write
+
+    steps:
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v2.0.10
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@tfso'
+
+      - name: Publish prerelease to GitHub Packages
+        working-directory: ./artifact
+        run: |
+          npm version prerelease --preid=branch.${{github.run_number}} --no-git-tag-version
+          npm publish --verbose --tag dev
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+  changelog:
+    if: ${{ github.ref == 'refs/heads/master' }} 
+    needs: build
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install
+        run: npm ci
+
+      # Creates tags and updates changelog based on change changelog-config.js settings
+      - name: Conventional Changelog Action
+        id: changelog
+        uses: TriPSs/conventional-changelog-action@v3
+        with: 
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          config-file-path: ./changelog-config.js
+      
+      - name: Fail if tagging is skipped
+        if: ${{ steps.changelog.outputs.skipped == 'true' }}
+        run: exit 1
+
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v2.0.10
+
+      - name: Copy package.json to artifact
+        run: cp package.json ./artifact/package.json
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          path: ./artifact
+
+  publish-prod:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    needs: changelog
+    runs-on: ubuntu-latest
+    permissions: 
+      packages: write
+    
+    steps:
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v2.0.10
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@tfso'
+          
+      - name: Publish to Github Packages
+        working-directory: ./artifact
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
