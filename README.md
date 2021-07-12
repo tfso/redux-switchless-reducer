@@ -1,3 +1,1 @@
 # redux-switchless-reducer
-
-TODO
